@@ -1,4 +1,5 @@
 import pymysql
+import numpy as np
 from config import DB_CONN_CONFIG
 
 
@@ -78,8 +79,8 @@ class Database():
         '''
         sql = "SELECT data FROM %s WHERE id = %d" % (table, id)
         self.cursor.execute(sql)
-        sample_list = self.cursor.fetchall()[0][0].decode().strip().split("\r\n")
-        
+        sample_list = list(map(np.float32, self.cursor.fetchall()[0][0].decode().strip().split("\r\n")))
+
         return sample_list
     
     def read_all_samples(self, table):
@@ -94,7 +95,9 @@ class Database():
         all_samples = []
         for idx in range(1, sample_num+1):
             all_samples.append(self.read_one_sample(table, idx))
-
+            if idx % 500 == 0:
+                print("Table %s : %d samples downloaded.\r" % (table, idx), end="")
+        print("Table %s : All %d samples downloaded." % (table, sample_num))
         return all_samples
 
 if __name__ == "__main__":
