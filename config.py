@@ -11,7 +11,9 @@ DB_CONN_CONFIG = {
 # Database Fetch Data Configuration
 FETCH_DATA_CONFIG = {
     "save_path"     : "dataset",
-    "dataset_name"  : ["hongganji", "bulb_arc", "bulb_normal"],
+    "dataset_name"  : ["hongganji", "bulb_arc", "bulb_normal",
+                       "xianshiqi_arc", "xianshiqi_normal",
+                       "xichenqi_arc", "xichenqi_normal"],
     "fetch_all"     : False,
     # 还未支持修改
     "shuffle"       : False,
@@ -22,9 +24,11 @@ FETCH_DATA_CONFIG = {
 MODEL_CONFIG = {
     # 数据集配置参数
     "read_path"     : "dataset",
-    "dataset_name"  : ["bulb_arc", "bulb_normal"],
+    "dataset_name"  : ["bulb_arc", "bulb_normal",
+                       "xichenqi_arc", "xichenqi_normal",
+                       "xianshiqi_arc", "xianshiqi_normal"],
     "training_ratio": 0.8,
-    "shuffle_buffer_size"   : 20000,    # 请尽量让它大于所有参与训练样本的总和，这样shuffle能够更彻底
+    "shuffle_buffer_size"   : 30000,    # 请尽量让它大于所有参与训练样本的总和，这样shuffle能够更彻底
     # 模型架构参数
 
     # 模型训练超参数
@@ -32,5 +36,6 @@ MODEL_CONFIG = {
     "batch_size"    : 500,
     "epoch"         : 50,
     # 模型存储参数
-    "model_path"    : "models"
+    "model_path"    : "models",
+    "model_name"    : "xianshiqi"
 }

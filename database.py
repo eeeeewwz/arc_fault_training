@@ -96,7 +96,7 @@ class Database():
         for idx in range(1, sample_num+1):
             all_samples.append(self.read_one_sample(table, idx))
             if idx % 500 == 0:
-                print("Table %s : %d samples downloaded.\r" % (table, idx), end="")
+                print("Table %s : %d/%d samples downloaded......\r" % (table, idx, sample_num), end="")
         print("Table %s : All %d samples downloaded." % (table, sample_num))
         return all_samples
 

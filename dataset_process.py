@@ -7,14 +7,28 @@ def shuffle_and_slice():
     '''
     读取本地数据集，随机打乱后，
     把数据集拼起来将数据和标签对应起来，并划分训练集和测试集
+
+    Returns
+    -------
+    x_train : np.ndarray
+        训练集
+    y_train : np.ndarray
+        训练集标签
+    x_test : np.ndarray
+        测试集
+    y_test : np.ndarray
+        测试集标签
     '''
-    x_all, y_all = [], []
     for label, ds_name in enumerate(MODEL_CONFIG["dataset_name"]):
         file_name = "%s/%s.npy" % (MODEL_CONFIG["read_path"], ds_name)
-        x_one_label = np.load(file_name)
-        y_one_label = np.full(shape=x_one_label.shape[0],fill_value=label)
-        np.append(x_all, x_one_label, axis=0)
-        np.append(y_all, y_one_label, axis=0)
+        if label == 0:
+            x_all = np.load(file_name)
+            y_all = np.full(shape=x_all.shape[0],fill_value=label)
+        else:
+            x_one_label = np.load(file_name)
+            y_one_label = np.full(shape=x_one_label.shape[0],fill_value=label)
+            x_all = np.append(x_all, x_one_label, axis=0)
+            y_all = np.append(y_all, y_one_label, axis=0)
 
     permutation = np.arange(len(x_all))
     np.random.shuffle(permutation)
@@ -31,21 +45,29 @@ def preprocess(x, y):
     '''
     数据集预处理，完成归一化和one-hot编码
     '''
-    x = tf.cast(x, dtype=tf.float32) / 2.
-    y = tf.cast(y, dtype=tf.int8) # 转成整形张量
-    y = tf.one_hot(y, depth=2) # one-hot编码
+    x = (tf.cast(x, dtype=tf.float32) - 0.8) / (1.2 - 0.8)
+    y = tf.cast(y, dtype=tf.int32) # 转成整形Tensor
+    y = tf.one_hot(y, depth=len(MODEL_CONFIG["dataset_name"])) # one-hot编码
     return x,y
 
 def construct_tf_dataset():
     '''
-    构造训练集，打乱、设置批大小、预处理函数以及重复次数(epoch)
+    构造训练集，打乱、设置批大小、预处理函数
+
+    Returns
+    -------
+    train_dataset : tf.data.Dataset
+        训练集
+    test_dataset : tf.data.Dataset
+        测试集
     '''
-    x_train, y_train, _, _ = shuffle_and_slice()
+    x_train, y_train, x_test, y_test = shuffle_and_slice()
 
-    train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-    train_ds = train_ds.shuffle(buffer_size = MODEL_CONFIG["shuffle_buffer_size"])
-    train_ds = train_ds.batch(batch_size = MODEL_CONFIG["batch_size"])
-    train_ds = train_ds.map(preprocess)
+    train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    train_dataset = train_dataset.shuffle(MODEL_CONFIG["shuffle_buffer_size"]).batch(MODEL_CONFIG["batch_size"]).map(preprocess)
 
-    return train_ds
+    test_dataset = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+    test_dataset = test_dataset.batch(MODEL_CONFIG["batch_size"]).map(preprocess)
+
+    return train_dataset, test_dataset
 
